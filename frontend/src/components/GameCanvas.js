@@ -306,8 +306,11 @@ const GameCanvas = ({ API }) => {
   };
 
   const winLevel = () => {
+    if (gameStateRef.current === 'won') return; // Prevent multiple wins
+    
     playSound('pop');
-    setGameState('won');
+    gameStateRef.current = 'won';
+    
     const newAttempts = attempts + 1;
     let stars = 0;
     if (newAttempts === 1) stars = 3;
@@ -325,6 +328,10 @@ const GameCanvas = ({ API }) => {
       setModalType('retry');
     }
     setShowModal(true);
+    
+    // Hide ball
+    gameRef.current.ball.x = -1000;
+    gameRef.current.ball.y = -1000;
   };
 
   const saveProgress = async (stars, attemptCount, completed) => {
