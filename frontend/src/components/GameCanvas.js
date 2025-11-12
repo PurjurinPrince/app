@@ -84,6 +84,7 @@ const GameCanvas = ({ API }) => {
     const ctx = canvas.getContext('2d');
     const game = gameRef.current;
     const level = game.level;
+    const currentState = gameStateRef.current;
     
     game.time += 0.016;
     
@@ -124,7 +125,7 @@ const GameCanvas = ({ API }) => {
     // Update and draw ball
     const ball = game.ball;
     
-    if (gameState === 'playing') {
+    if (currentState === 'playing') {
       // Apply gravity
       const gravity = level.gravity || 0.5;
       ball.vy += gravity;
