@@ -64,29 +64,45 @@ const GameCanvas = ({ API }) => {
     };
   }, [levelNumber]);
 
-  const initGame = () => {
+  // ============================================
+  // INITIALIZATION
+  // ============================================
+  const initGame = (resetPosition = true) => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     
     const level = gameRef.current.level;
-    gameRef.current.ball = {
-      x: level.ballStart.x,
-      y: level.ballStart.y,
-      vx: 0,
-      vy: 0,
-      radius: 30,
-      dragging: false,
-      startX: level.ballStart.x,
-      startY: level.ballStart.y
-    };
+    
+    // Only reset ball position on first load or explicit reset
+    if (resetPosition || isFirstAttemptRef.current) {
+      gameRef.current.ball = {
+        x: level.ballStart.x,
+        y: level.ballStart.y,
+        vx: 0,
+        vy: 0,
+        radius: 30,
+        dragging: false,
+        startX: level.ballStart.x,
+        startY: level.ballStart.y
+      };
+      isFirstAttemptRef.current = true;
+    } else {
+      // Keep current position but reset velocities
+      gameRef.current.ball.vx = 0;
+      gameRef.current.ball.vy = 0;
+      gameRef.current.ball.dragging = false;
+    }
     
     gameRef.current.time = 0;
     gameRef.current.dragStartX = 0;
     gameRef.current.dragStartY = 0;
+    gameRef.current.onGround = false;
     gameStateRef.current = 'ready';
     setMessage('Pull back the ball and release!');
     
-    gameLoop();
+    if (!gameRef.current.animationId) {
+      gameLoop();
+    }
   };
 
   const gameLoop = () => {
