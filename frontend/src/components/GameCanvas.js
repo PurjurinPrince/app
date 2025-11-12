@@ -404,6 +404,9 @@ const GameCanvas = ({ API }) => {
     }
   };
 
+  // ============================================
+  // MOUSE HANDLERS (with global coordinates)
+  // ============================================
   const getCanvasCoordinates = (e) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
@@ -417,6 +420,12 @@ const GameCanvas = ({ API }) => {
   const handleMouseDown = (e) => {
     if (gameStateRef.current !== 'ready') return;
     
+    // Check if attempts exceeded before allowing new shot
+    if (attempts >= MAX_ATTEMPTS) {
+      showRetryScreen();
+      return;
+    }
+    
     const { x, y } = getCanvasCoordinates(e);
     const ball = gameRef.current.ball;
     const dx = x - ball.x;
@@ -428,12 +437,17 @@ const GameCanvas = ({ API }) => {
       gameRef.current.dragStartX = ball.x;
       gameRef.current.dragStartY = ball.y;
       gameRef.current.mouse = { x, y, down: true };
+      gameRef.current.globalMouse = { x: e.clientX, y: e.clientY };
       gameStateRef.current = 'pulling';
       playSound('stretch');
     }
   };
 
   const handleMouseMove = (e) => {
+    // Use global mouse coordinates (can be outside canvas)
+    gameRef.current.globalMouse = { x: e.clientX, y: e.clientY };
+    
+    // Also update canvas-relative coordinates
     const { x, y } = getCanvasCoordinates(e);
     gameRef.current.mouse = { ...gameRef.current.mouse, x, y };
   };
@@ -447,11 +461,22 @@ const GameCanvas = ({ API }) => {
     ball.dragging = false;
     gameRef.current.mouse.down = false;
     
-    // Calculate launch velocity - opposite direction from pull
-    const dx = game.dragStartX - game.mouse.x;
-    const dy = game.dragStartY - game.mouse.y;
+    // Calculate launch velocity using GLOBAL coordinates for maximum power
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    
+    // Ball screen position
+    const ballScreenX = rect.left + (ball.x / canvas.width) * rect.width;
+    const ballScreenY = rect.top + (ball.y / canvas.height) * rect.height;
+    
+    // Calculate distance from ball to global mouse position
+    const dx = ballScreenX - game.globalMouse.x;
+    const dy = ballScreenY - game.globalMouse.y;
     const distance = Math.sqrt(dx * dx + dy * dy);
-    const power = Math.min(distance / 15, 25); // Max velocity of 25
+    
+    // Power calculation with smooth cap at MAX_VELOCITY
+    const rawPower = distance / 12;
+    const power = Math.min(rawPower, MAX_VELOCITY);
     
     if (distance > 5) { // Minimum pull distance
       const angle = Math.atan2(dy, dx);
@@ -461,13 +486,24 @@ const GameCanvas = ({ API }) => {
       
       playSound('snap');
       gameStateRef.current = 'playing';
-      setAttempts(prev => prev + 1);
+      
+      const newAttempts = attempts + 1;
+      setAttempts(newAttempts);
       setMessage('Go!');
+      
+      // After first attempt, ball no longer resets to start
+      isFirstAttemptRef.current = false;
     } else {
       // Not enough pull, reset
       gameStateRef.current = 'ready';
       setMessage('Pull back the ball and release!');
     }
+  };
+  
+  const showRetryScreen = () => {
+    setModalType('retry');
+    setEarnedStars(0);
+    setShowModal(true);
   };
 
   const handleRetry = () => {
