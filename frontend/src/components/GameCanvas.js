@@ -278,7 +278,7 @@ const GameCanvas = ({ API }) => {
       // Check vertex collisions for win condition
       if (!level.noVertexPop && gameStateRef.current === 'playing') {
         level.shapes.forEach(shape => {
-          if (shape.canPop !== false) {
+          if (shape.canPop !== false && !shape.invisible) {
             const vertices = shape.type === 'rectangle' ? getRectVertices(shape) : shape.points;
             vertices.forEach(vertex => {
               const inCanvas = vertex.x >= 0 && vertex.x <= 1366 && vertex.y >= 0 && vertex.y <= 768;
@@ -291,12 +291,12 @@ const GameCanvas = ({ API }) => {
       }
       
       // Stop if ball is too slow and on ground
-      if (Math.abs(ball.vx) < 0.5 && Math.abs(ball.vy) < 0.5 && ball.y > 700) {
+      if (Math.abs(ball.vx) < 0.3 && Math.abs(ball.vy) < 0.3 && game.onGround) {
         gameStateRef.current = 'ready';
-        ball.x = ball.startX;
-        ball.y = ball.startY;
         ball.vx = 0;
         ball.vy = 0;
+        // Ball stays where it stopped (not reset to start)
+        isFirstAttemptRef.current = false;
         setMessage('Try again! Pull back the ball.');
       }
     }
