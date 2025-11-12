@@ -358,7 +358,7 @@ const GameCanvas = ({ API }) => {
   };
 
   const handleMouseDown = (e) => {
-    if (gameState !== 'ready') return;
+    if (gameStateRef.current !== 'ready') return;
     
     const { x, y } = getCanvasCoordinates(e);
     const ball = gameRef.current.ball;
@@ -366,9 +366,12 @@ const GameCanvas = ({ API }) => {
     const dy = y - ball.y;
     const dist = Math.sqrt(dx * dx + dy * dy);
     
-    if (dist < ball.radius) {
+    if (dist < ball.radius + 10) {
       ball.dragging = true;
+      gameRef.current.dragStartX = ball.x;
+      gameRef.current.dragStartY = ball.y;
       gameRef.current.mouse = { x, y, down: true };
+      gameStateRef.current = 'pulling';
       playSound('stretch');
     }
   };
@@ -380,24 +383,34 @@ const GameCanvas = ({ API }) => {
 
   const handleMouseUp = (e) => {
     const ball = gameRef.current.ball;
-    if (!ball.dragging) return;
+    const game = gameRef.current;
+    
+    if (!ball.dragging || gameStateRef.current !== 'pulling') return;
     
     ball.dragging = false;
     gameRef.current.mouse.down = false;
     
-    // Calculate launch velocity
-    const dx = ball.startX - gameRef.current.mouse.x;
-    const dy = ball.startY - gameRef.current.mouse.y;
-    const power = Math.min(Math.sqrt(dx * dx + dy * dy) / 10, 20);
-    const angle = Math.atan2(dy, dx);
+    // Calculate launch velocity - opposite direction from pull
+    const dx = game.dragStartX - game.mouse.x;
+    const dy = game.dragStartY - game.mouse.y;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const power = Math.min(distance / 15, 25); // Max velocity of 25
     
-    ball.vx = Math.cos(angle) * power;
-    ball.vy = Math.sin(angle) * power;
-    
-    playSound('snap');
-    setGameState('playing');
-    setAttempts(prev => prev + 1);
-    setMessage('Go!');
+    if (distance > 5) { // Minimum pull distance
+      const angle = Math.atan2(dy, dx);
+      
+      ball.vx = Math.cos(angle) * power;
+      ball.vy = Math.sin(angle) * power;
+      
+      playSound('snap');
+      gameStateRef.current = 'playing';
+      setAttempts(prev => prev + 1);
+      setMessage('Go!');
+    } else {
+      // Not enough pull, reset
+      gameStateRef.current = 'ready';
+      setMessage('Pull back the ball and release!');
+    }
   };
 
   const handleRetry = () => {
