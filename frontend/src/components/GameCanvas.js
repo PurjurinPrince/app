@@ -336,6 +336,9 @@ const GameCanvas = ({ API }) => {
     ];
   };
 
+  // ============================================
+  // WIN / RETRY LOGIC
+  // ============================================
   const winLevel = () => {
     if (gameStateRef.current === 'won') return; // Prevent multiple wins
     
@@ -344,13 +347,16 @@ const GameCanvas = ({ API }) => {
     
     const newAttempts = attempts + 1;
     let stars = 0;
+    
+    // New scoring system: 3★=1 attempt, 2★=2-3 attempts, 1★=4 attempts
     if (newAttempts === 1) stars = 3;
-    else if (newAttempts === 2) stars = 2;
-    else if (newAttempts === 3) stars = 1;
+    else if (newAttempts >= 2 && newAttempts <= 3) stars = 2;
+    else if (newAttempts === 4) stars = 1;
+    else stars = 0; // More than 4 attempts
     
     setEarnedStars(stars);
     
-    // Save progress
+    // Save progress with highest stars tracking
     saveProgress(stars, newAttempts, stars > 0);
     
     if (stars > 0) {
