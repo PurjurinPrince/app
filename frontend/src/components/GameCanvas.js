@@ -301,12 +301,14 @@ const GameCanvas = ({ API }) => {
       }
     }
     
-    // Draw ball
+    // ============================================
+    // DRAW BALL
+    // ============================================
     ctx.save();
     if (ball.dragging && currentState === 'pulling') {
-      // Yellow glow when pulling
+      // Yellow glow when pulling (reduced by 30%)
       ctx.shadowColor = '#ffff00';
-      ctx.shadowBlur = 30;
+      ctx.shadowBlur = GLOW_RADIUS;
     }
     ctx.fillStyle = '#ff6b35';
     ctx.beginPath();
@@ -314,35 +316,8 @@ const GameCanvas = ({ API }) => {
     ctx.fill();
     ctx.restore();
     
-    // Draw pull indicator
-    if (ball.dragging && currentState === 'pulling') {
-      ctx.strokeStyle = '#ffff00';
-      ctx.lineWidth = 3;
-      ctx.setLineDash([5, 5]);
-      ctx.beginPath();
-      ctx.moveTo(ball.x, ball.y);
-      ctx.lineTo(game.mouse.x, game.mouse.y);
-      ctx.stroke();
-      ctx.setLineDash([]);
-      
-      // Draw arrow at pull direction
-      const dx = ball.x - game.mouse.x;
-      const dy = ball.y - game.mouse.y;
-      const angle = Math.atan2(dy, dx);
-      const arrowLen = 20;
-      ctx.beginPath();
-      ctx.moveTo(game.mouse.x, game.mouse.y);
-      ctx.lineTo(
-        game.mouse.x + Math.cos(angle + 0.5) * arrowLen,
-        game.mouse.y + Math.sin(angle + 0.5) * arrowLen
-      );
-      ctx.moveTo(game.mouse.x, game.mouse.y);
-      ctx.lineTo(
-        game.mouse.x + Math.cos(angle - 0.5) * arrowLen,
-        game.mouse.y + Math.sin(angle - 0.5) * arrowLen
-      );
-      ctx.stroke();
-    }
+    // NO pull indicator line - player uses intuition
+    // (Removed yellow dotted line as per requirements)
     
     game.animationId = requestAnimationFrame(gameLoop);
   };
