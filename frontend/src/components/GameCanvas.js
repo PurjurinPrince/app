@@ -237,20 +237,31 @@ const GameCanvas = ({ API }) => {
               shape.vy = ball.vy * 0.3;
               shape.angularVel = (ball.vx * 0.05);
               resolveCollision(ball, collision);
-            } else if (!shape.special || shape.special !== 'barrier') {
+            } else if (shape.special === 'barrier' || shape.special === 'solid') {
+              // Solid barriers (Level 3 & 8) - perfect bounce, no momentum loss
+              resolveCollision(ball, collision, true);
+            } else if (shape.invisible) {
+              // Invisible wall collision
+              resolveCollision(ball, collision, true);
+            } else {
               resolveCollision(ball, collision);
+            }
+            
+            // Check if on ground after collision
+            if (Math.abs(collision.normal.y) > 0.7 && ball.vy > 0) {
+              game.onGround = true;
             }
           }
         } else if (shape.type === 'triangle') {
           const collision = checkEdgeCollision(ball, shape);
           if (collision.hit) {
             if (shape.special === 'bouncy') {
-              // Bouncy triangle
+              // Bouncy triangle - extra elastic bounce
               const dx = ball.x - shape.cx;
               const dy = ball.y - shape.cy;
               const dist = Math.sqrt(dx * dx + dy * dy);
-              ball.vx = (dx / dist) * 20;
-              ball.vy = (dy / dist) * 20;
+              ball.vx = (dx / dist) * 22;
+              ball.vy = (dy / dist) * 22;
               playSound('bounce');
             } else if (shape.special === 'movable') {
               shape.vx = ball.vx * 0.3;
