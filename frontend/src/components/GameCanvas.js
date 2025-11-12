@@ -105,6 +105,9 @@ const GameCanvas = ({ API }) => {
     }
   };
 
+  // ============================================
+  // GAME LOOP
+  // ============================================
   const gameLoop = () => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -125,8 +128,10 @@ const GameCanvas = ({ API }) => {
       level.update(game.time);
     }
     
-    // Draw shapes
+    // Draw shapes (including invisible walls)
     level.shapes.forEach(shape => {
+      if (shape.invisible) return; // Don't draw invisible walls
+      
       if (shape.type === 'rectangle') {
         ctx.save();
         ctx.translate(shape.x, shape.y);
@@ -153,6 +158,9 @@ const GameCanvas = ({ API }) => {
     // Update and draw ball
     const ball = game.ball;
     
+    // ============================================
+    // PHYSICS UPDATE
+    // ============================================
     if (currentState === 'playing') {
       // Apply gravity
       const gravity = level.gravity || 0.5;
