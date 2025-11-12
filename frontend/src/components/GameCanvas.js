@@ -371,11 +371,31 @@ const GameCanvas = ({ API }) => {
     gameRef.current.ball.y = -1000;
   };
 
+  // ============================================
+  // PROGRESS PERSISTENCE (localStorage + API)
+  // ============================================
   const saveProgress = async (stars, attemptCount, completed) => {
     try {
+      // Get existing progress from localStorage
+      const localProgress = JSON.parse(localStorage.getItem('bouncyBallProgress') || '{}');
+      const levelKey = `level_${levelNumber}`;
+      const existingStars = localProgress[levelKey]?.stars || 0;
+      
+      // Only save if new stars are better (never downgrade)
+      const finalStars = Math.max(stars, existingStars);
+      
+      localProgress[levelKey] = {
+        stars: finalStars,
+        attempts: attemptCount,
+        completed: completed || localProgress[levelKey]?.completed || false
+      };
+      
+      localStorage.setItem('bouncyBallProgress', JSON.stringify(localProgress));
+      
+      // Also save to API
       await axios.post(`${API}/progress`, {
         level: parseInt(levelNumber),
-        stars,
+        stars: finalStars,
         attempts: attemptCount,
         completed
       });
