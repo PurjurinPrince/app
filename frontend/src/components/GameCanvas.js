@@ -5,6 +5,14 @@ import { levels } from '../utils/levels';
 import { checkVertexCollision, checkEdgeCollision, resolveCollision, applyGravity, checkWallCollision } from '../utils/physics';
 import { playSound } from '../utils/sounds';
 
+// ============================================
+// CONSTANTS
+// ============================================
+const MAX_ATTEMPTS = 4;
+const MAX_VELOCITY = 40;
+const GROUND_FRICTION = 0.985;
+const GLOW_RADIUS = 21; // Reduced by 30% from 30
+
 const GameCanvas = ({ API }) => {
   const canvasRef = useRef(null);
   const { levelNumber } = useParams();
@@ -16,14 +24,18 @@ const GameCanvas = ({ API }) => {
   const [earnedStars, setEarnedStars] = useState(0);
   
   const gameStateRef = useRef('ready'); // ready, pulling, playing, won
+  const isFirstAttemptRef = useRef(true); // Track if this is the first attempt
+  
   const gameRef = useRef({
     ball: { x: 0, y: 0, vx: 0, vy: 0, radius: 30, dragging: false },
     mouse: { x: 0, y: 0, down: false },
+    globalMouse: { x: 0, y: 0 }, // Global mouse position (can be outside canvas)
     level: null,
     animationId: null,
     time: 0,
     dragStartX: 0,
-    dragStartY: 0
+    dragStartY: 0,
+    onGround: false
   });
 
   useEffect(() => {
