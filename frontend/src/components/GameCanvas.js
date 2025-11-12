@@ -247,7 +247,7 @@ const GameCanvas = ({ API }) => {
     
     // Draw ball
     ctx.save();
-    if (ball.dragging) {
+    if (ball.dragging && currentState === 'pulling') {
       // Yellow glow when pulling
       ctx.shadowColor = '#ffff00';
       ctx.shadowBlur = 30;
@@ -259,15 +259,33 @@ const GameCanvas = ({ API }) => {
     ctx.restore();
     
     // Draw pull indicator
-    if (ball.dragging) {
+    if (ball.dragging && currentState === 'pulling') {
       ctx.strokeStyle = '#ffff00';
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 3;
       ctx.setLineDash([5, 5]);
       ctx.beginPath();
-      ctx.moveTo(ball.startX, ball.startY);
+      ctx.moveTo(ball.x, ball.y);
       ctx.lineTo(game.mouse.x, game.mouse.y);
       ctx.stroke();
       ctx.setLineDash([]);
+      
+      // Draw arrow at pull direction
+      const dx = ball.x - game.mouse.x;
+      const dy = ball.y - game.mouse.y;
+      const angle = Math.atan2(dy, dx);
+      const arrowLen = 20;
+      ctx.beginPath();
+      ctx.moveTo(game.mouse.x, game.mouse.y);
+      ctx.lineTo(
+        game.mouse.x + Math.cos(angle + 0.5) * arrowLen,
+        game.mouse.y + Math.sin(angle + 0.5) * arrowLen
+      );
+      ctx.moveTo(game.mouse.x, game.mouse.y);
+      ctx.lineTo(
+        game.mouse.x + Math.cos(angle - 0.5) * arrowLen,
+        game.mouse.y + Math.sin(angle - 0.5) * arrowLen
+      );
+      ctx.stroke();
     }
     
     game.animationId = requestAnimationFrame(gameLoop);
