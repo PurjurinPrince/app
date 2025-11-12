@@ -11,17 +11,19 @@ const GameCanvas = ({ API }) => {
   const navigate = useNavigate();
   const [attempts, setAttempts] = useState(0);
   const [message, setMessage] = useState('Pull back the ball and release!');
-  const [gameState, setGameState] = useState('ready'); // ready, pulling, playing, won, lost
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState(''); // win, retry
   const [earnedStars, setEarnedStars] = useState(0);
   
+  const gameStateRef = useRef('ready'); // ready, pulling, playing, won
   const gameRef = useRef({
     ball: { x: 0, y: 0, vx: 0, vy: 0, radius: 30, dragging: false },
     mouse: { x: 0, y: 0, down: false },
     level: null,
     animationId: null,
-    time: 0
+    time: 0,
+    dragStartX: 0,
+    dragStartY: 0
   });
 
   useEffect(() => {
