@@ -242,23 +242,27 @@ export const levels = [
     update: function(time) {
       this.shapes.forEach(shape => {
         if (shape.special === 'movable') {
-          shape.x += shape.vx;
-          shape.y += shape.vy;
-          shape.rotation += shape.angularVel;
+          if (shape.type === 'triangle') {
+            // Move triangle center
+            shape.cx += shape.vx;
+            shape.cy += shape.vy;
+            shape.rotation += shape.angularVel;
+            
+            // Update points to follow center
+            shape.points.forEach(p => {
+              p.x += shape.vx;
+              p.y += shape.vy;
+            });
+          } else {
+            // Rectangle movement
+            shape.x += shape.vx;
+            shape.y += shape.vy;
+            shape.rotation += shape.angularVel;
+          }
+          
           shape.vx *= 0.99;
           shape.vy *= 0.99;
           shape.angularVel *= 0.98;
-          
-          if (shape.type === 'triangle') {
-            const dx = shape.x - shape.cx;
-            const dy = shape.y - shape.cy;
-            shape.points.forEach(p => {
-              p.x += dx;
-              p.y += dy;
-            });
-            shape.cx = shape.x;
-            shape.cy = shape.y;
-          }
         }
       });
     }
