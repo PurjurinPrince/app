@@ -416,15 +416,17 @@ const GameCanvas = ({ API }) => {
   const handleRetry = () => {
     setShowModal(false);
     setAttempts(0);
+    gameStateRef.current = 'ready';
     initGame();
   };
 
   const handleNextLevel = () => {
     const next = parseInt(levelNumber) + 1;
     if (next <= 8) {
-      navigate(`/level/${next}`);
       setShowModal(false);
       setAttempts(0);
+      gameStateRef.current = 'ready';
+      navigate(`/level/${next}`);
     } else {
       navigate('/');
     }
