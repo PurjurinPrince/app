@@ -170,6 +170,9 @@ const GameCanvas = ({ API }) => {
       ball.x += ball.vx;
       ball.y += ball.vy;
       
+      // Check if on ground for friction
+      game.onGround = false;
+      
       // Wall collisions
       const hasWalls = level.hasWalls !== false;
       if (hasWalls) {
@@ -194,7 +197,13 @@ const GameCanvas = ({ API }) => {
       if (ball.y + ball.radius > 768) {
         ball.y = 768 - ball.radius;
         ball.vy *= -0.8;
-        ball.vx *= 0.95;
+        game.onGround = true;
+      }
+      
+      // Apply ground friction
+      if (game.onGround) {
+        ball.vx *= GROUND_FRICTION;
+        ball.vy *= GROUND_FRICTION;
       }
       
       // Check collisions with shapes
