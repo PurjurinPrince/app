@@ -571,7 +571,7 @@ const GameCanvas = ({ API }) => {
             <p className="modal-message" data-testid="modal-message">
               {modalType === 'win' 
                 ? `You completed this level in ${attempts} attempt${attempts !== 1 ? 's' : ''}!`
-                : 'You\'ve used all your attempts. Try again!'}
+                : 'Too many attempts! Try again.'}
             </p>
             
             <div className="modal-buttons" data-testid="modal-buttons">
