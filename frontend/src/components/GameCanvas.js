@@ -69,7 +69,9 @@ const GameCanvas = ({ API }) => {
     };
     
     gameRef.current.time = 0;
-    setGameState('ready');
+    gameRef.current.dragStartX = 0;
+    gameRef.current.dragStartY = 0;
+    gameStateRef.current = 'ready';
     setMessage('Pull back the ball and release!');
     
     gameLoop();
