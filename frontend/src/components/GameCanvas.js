@@ -506,11 +506,15 @@ const GameCanvas = ({ API }) => {
     setShowModal(true);
   };
 
+  // ============================================
+  // MODAL HANDLERS
+  // ============================================
   const handleRetry = () => {
     setShowModal(false);
     setAttempts(0);
+    isFirstAttemptRef.current = true; // Reset to start position on retry
     gameStateRef.current = 'ready';
-    initGame();
+    initGame(true); // Force position reset
   };
 
   const handleNextLevel = () => {
@@ -518,6 +522,7 @@ const GameCanvas = ({ API }) => {
     if (next <= 8) {
       setShowModal(false);
       setAttempts(0);
+      isFirstAttemptRef.current = true;
       gameStateRef.current = 'ready';
       navigate(`/level/${next}`);
     } else {
